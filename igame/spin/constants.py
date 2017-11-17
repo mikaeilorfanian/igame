@@ -1,0 +1,11 @@
+from decimal import Decimal
+
+
+SPIN_APP_SETTINGS = {
+    'MIN_REAL_MONEY_DEPOSIT_TO_GET_BONUS': Decimal(100),
+    'DEFAULT_MONEY_DEPOSIT_BONUS_AMOUNT': Decimal(10),
+    'LOGIN_BONUS_AMOUNT': Decimal(100),
+    'DEFAULT_GAME_LOSE_OR_WIN_AMOUNT': Decimal(2),
+    'TEST_USER_BEGINNING_BALANCE': Decimal(100),
+
+}

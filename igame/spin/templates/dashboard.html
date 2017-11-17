@@ -1,0 +1,36 @@
+{% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+<form action="/dashboard/" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit" />
+</form>
+
+<div>
+  <h2>Real Money Wallet</h2>
+  Your balance: {{ real_money_wallet.current_balance }}
+</div>
+
+{% for w in bonus_wallets %}
+  <div>
+    Wallet ID: {{ w.id }}, balance: {{ w.current_balance }}
+  </div>
+{% endfor %}
+
+<div>
+  <form action="/play/">
+      <input type="submit" value="Play a Game" />
+  </form>
+</div>
+
+<div>
+  <form action="/logout/">
+      <input type="submit" value="Logout" />
+  </form>
+</div>
