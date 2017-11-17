@@ -23,6 +23,8 @@ Adding a new bonus type involves creating a new row in the `BonusType` table and
 Since giving a bonus involves money it is treated as a `Transaction`. Other types of `Transaction`s are:   
 - user depositing money into their wallet  
 - user winning or losing a game  
+
+
 Future `Transaction` types can be added without having to do complex database migrations. The reason for this is that `Transaction` is a generic type. It has a one-to-one relationship with specific transaction types like `BonusTransaction`. This means that to create a new type of transaction like `DepositTransaction`, I just create a new table with that name. This transaction type(and database table) will be totally independent of other transaction types(and database tables).  
 ## What's Bad About This Solution
 
@@ -44,5 +46,3 @@ Turning this solution into a monolith can be challening especially if new types 
 - I'm not handling exceptions caused by failing database transactions. Such exceptions would cause 500 errors.  
 - I don't have any tests for the views. Also, the handling of bonuses is not fully tested.  
 - I've not specified the currency of transactions or money anywhere in this application.  
-
-
