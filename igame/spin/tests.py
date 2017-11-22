@@ -1,5 +1,6 @@
 from decimal import Decimal
 import unittest
+from unittest import skip
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -18,6 +19,7 @@ from .models import (
     Transaction,
     Wallet,
 )
+from .wagering import MoneySpent
 from redis.fake_redis import FakeReadis, fake_redis
 
 
@@ -345,6 +347,41 @@ class TestRedisFakerClass(unittest.TestCase):
     def test_reset_fake_redis(self):
         fake_redis.set('c', 10)
         fake_redis.clear()
+
         self.assertEqual(len(fake_redis.storage), 0)
         self.assertEqual(len(FakeReadis.storage), 0)
+
+
+class TestMoneySpentClass(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username='test-user')
+        self.money_spent = MoneySpent(self.user.pk)
+
+    def tearDown(self):
+        self.money_spent.redis.storage = dict()
+
+    def test_key_to_cached_amount_of_money_spent_by_user(self):
+        self.assertIn(str(self.user.pk), self.money_spent.key)
+
+    def test_set_user_money_spent_and_get_total(self):
+        self.money_spent.set(Decimal(100))
+
+        self.assertEqual(self.money_spent.total, Decimal(100))
+
+    @skip('Not implemented method')
+    def test_calculate_total_money_spent_for_user_when_its_not_in_cache(self):
+        self.money_spent.calculate_total()
+
+    def test_increase_money_spent_for_user(self):
+        self.money_spent.set(Decimal(0))
+        self.money_spent.increase(Decimal(10))
+
+        self.assertEqual(self.money_spent.total, Decimal(10))
+
+    def test_decrease_money_spent(self):
+        self.money_spent.set(Decimal(10))
+        self.money_spent.decrease(Decimal(1))
+
+        self.assertEqual(self.money_spent.total, Decimal(9))
 
