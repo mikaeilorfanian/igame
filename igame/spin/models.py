@@ -50,6 +50,7 @@ class Wallet(models.Model):
     money_type = models.CharField(max_length=50, choices=MONEY_TYPE_CHOICES, null=False)
     user = models.ForeignKey(User, related_name='wallets')
     current_balance = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal(0))
+    wagering_requirement = models.IntegerField(default=10)
 
     def __str__(self):
         return 'balance: {}, type: {}'.format(self.current_balance, self.money_type)
