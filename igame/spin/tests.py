@@ -1,4 +1,5 @@
 from decimal import Decimal
+import unittest
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -17,6 +18,7 @@ from .models import (
     Transaction,
     Wallet,
 )
+from redis.fake_redis import FakeReadis, fake_redis
 
 
 class TestDepositRealMoneyFunction(TestCase):
@@ -313,3 +315,36 @@ class TestUserLogin(TestCase):
 
     def test_user_gets_empty_real_money_wallet_after_its_created(self):
         pass
+
+
+
+class TestRedisFakerClass(unittest.TestCase):
+
+    def setUp(self):
+        self.redis = FakeReadis()
+
+    def tearDown(self):
+        del self.redis
+
+    def test_set_and_get_two_keys(self):
+        self.redis.set('a', 10)
+        self.redis.set('b', 20)
+
+        self.assertEqual(self.redis.get('a'), 10)
+        self.assertEqual(self.redis.get('b'), 20)
+
+    def test_increment_and_decrement_value(self):
+        self.redis.set('a', 10)
+        self.redis.incr('a', 2)
+        self.assertEqual(self.redis.get('a'), 12)
+
+        self.redis.set('b', 3)
+        self.redis.decr('b', 3)
+        self.assertEqual(self.redis.get('b'), 0)
+
+    def test_reset_fake_redis(self):
+        fake_redis.set('c', 10)
+        fake_redis.clear()
+        self.assertEqual(len(fake_redis.storage), 0)
+        self.assertEqual(len(FakeReadis.storage), 0)
+
