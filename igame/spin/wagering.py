@@ -1,6 +1,6 @@
 from redis.fake_redis import fake_redis
 
-class MoneySpent:
+class MoneySpentForWagering:
 
     redis = fake_redis
 

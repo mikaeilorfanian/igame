@@ -19,7 +19,7 @@ from .models import (
     Transaction,
     Wallet,
 )
-from .wagering import MoneySpent
+from .wagering import MoneySpentForWagering, transfer_eligible_bonuses_to_real_money_wallet
 from redis.fake_redis import FakeReadis, fake_redis
 
 
@@ -356,7 +356,7 @@ class TestMoneySpentClass(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(username='test-user')
-        self.money_spent = MoneySpent(self.user.pk)
+        self.money_spent = MoneySpentForWagering(self.user.pk)
 
     def tearDown(self):
         self.money_spent.redis.storage = dict()
