@@ -46,3 +46,13 @@ Turning this solution into a monolith can be challening especially if new types 
 - I'm not handling exceptions caused by failing database transactions. Such exceptions would cause 500 errors.  
 - I don't have any tests for the views. Also, the handling of bonuses is not fully tested.  
 - I've not specified the currency of transactions or money anywhere in this application.  
+
+### Update
+- I'm using a redis mock to keep track of how much money user spends and wagers. This mock has an API very similar to `redis-py`.
+- Since there's no redis, none of the guarantees and benefits of redis(e.g. atomicity, concurrency control, speed) are present in this solution.
+- The wager requirement is the same for all bonuses(10)
+- The wager requirement is saved for all `wallet` rows even real money ones which don't need it. This is not good practice.
+- There are a few circular imports that I've fixed temporarily in a hacky way.
+- There could be potential race conditions in `transfer_eligible_bonuses_to_real_money_wallet` function if user takes concurrent or fast actions that affect `wallet` rows. I tried to mitigate most of the issues, but not all potential race conditions are dealt with.
+- The new feature(automatic wagering) is well-tested but I didn't manually test the webpage to see if the new feature can throw 500 errors.
+- I think one of the best ways to deal with concurrency control issues in this application is to serialize user's actions. We can lock user's wallets and even explicity tell the user not to use the system concurrently. Or, we can give the impression that concurrent games are possible when we actually queue user actions in the backend.
