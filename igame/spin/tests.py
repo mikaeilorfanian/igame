@@ -326,7 +326,7 @@ class TestRedisFakerClass(unittest.TestCase):
         self.redis = FakeReadis()
 
     def tearDown(self):
-        del self.redis
+        self.redis.storage = dict()
 
     def test_set_and_get_two_keys(self):
         self.redis.set('a', 10)
@@ -345,8 +345,8 @@ class TestRedisFakerClass(unittest.TestCase):
         self.assertEqual(self.redis.get('b'), 0)
 
     def test_reset_fake_redis(self):
-        fake_redis.set('c', 10)
-        fake_redis.clear()
+        self.redis.set('c', 10)
+        self.redis.clear()
 
         self.assertEqual(len(fake_redis.storage), 0)
         self.assertEqual(len(FakeReadis.storage), 0)
