@@ -20,7 +20,7 @@ class MoneySpentForWagering:
     def total(self):
         total = self.redis.get(self.key)
 
-        if not total:
+        if total is None:
             total = self.calculate_total()
             self.set(total)
 
