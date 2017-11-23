@@ -103,7 +103,30 @@ class SpinGameTransaction(models.Model):
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE)
 
 
+user_spendt_money_signal = Signal(providing_args=['user_id']) # todo send this signal
+
+
+class BonusWageredTransaction(models.Model):
+    transaction = models.OneToOneField(Transaction, on_delete=models.CASCADE, primary_key=True)
+    bonus_wallet = models.OneToOneField(Wallet, related_name='bonus_wager_transaction')
+    real_money_wallet = models.ForeignKey(Wallet)
+    amount = models.DecimalField(max_digits=5, decimal_places=2, null=False)
+
+
+@receiver(user_spendt_money_signal)
+def update_bonus_wagering(user_id, **kwargs):
+    user = User.objects.get(pk=user_id)
+
+    from .wagering import transfer_eligible_bonuses_to_real_money_wallet
+    transfer_eligible_bonuses_to_real_money_wallet(user)
+
+
+
 @receiver(post_save, sender=User)
-def create_real_money_wallet(sender, instance, created, **kwargs):
+def user_setup(sender, instance, created, **kwargs):
     if created:
         Wallet.objects.create(user=instance, money_type=Wallet.REAL_MONEY)
+
+        from .wagering import MoneySpentForWagering
+        money_spent = MoneySpentForWagering(instance.pk)
+        money_spent.set(Decimal(0))

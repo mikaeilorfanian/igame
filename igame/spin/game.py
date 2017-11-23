@@ -5,7 +5,7 @@ from django.db.models import F
 
 from .constants import SPIN_APP_SETTINGS as app_settings
 from .deduct import deduct_real_money__user_lost_game, get_wallet_for_game
-from .models import BalanceTooLowError, Game, SpinGameTransaction, Transaction, Wallet
+from .models import BalanceTooLowError, Game, SpinGameTransaction, Transaction, user_spendt_money_signal, Wallet
 
 
 def play_random_game(user):
@@ -21,6 +21,8 @@ def play_game(user, outcome, bet_amount):
             deduct_real_money__user_lost_game(user, bet_amount)
         else:
             reward_user(user, bet_amount)
+
+    user_spendt_money_signal.send(sender=None, user_id=user.pk)
 
 
 def reward_user(user, bet_amount):

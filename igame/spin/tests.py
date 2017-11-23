@@ -385,3 +385,71 @@ class TestMoneySpentClass(TestCase):
 
         self.assertEqual(self.money_spent.total, Decimal(9))
 
+
+class TestBonusWagerUpdate(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username='test-user')
+        self.money_spent = MoneySpentForWagering(self.user.pk)
+        create_default_bonus_types()
+
+    def test_user_has_no_bonus_money_wallets_so_money_spent_doesnt_change(self):
+        self.money_spent.set((Decimal(10)))
+
+        transfer_eligible_bonuses_to_real_money_wallet(self.user)
+
+        self.assertEqual(self.money_spent.total, Decimal(10))
+
+    def test_user_has_one_empty_bonus_money_wallet_so_money_spent_doesnt_change(self):
+        give_user_a_bonus(self.user, BonusType.objects.get(event=BonusType.LOGIN), Decimal(0))
+        self.money_spent.set((Decimal(10)))
+
+        transfer_eligible_bonuses_to_real_money_wallet(self.user)
+
+        self.assertEqual(self.money_spent.total, Decimal(10))
+
+    def test_user_has_more_than_one_empty_bonus_wallets_so_money_spent_doesnt_change(self):
+        give_user_a_bonus(self.user, BonusType.objects.get(event=BonusType.LOGIN), Decimal(0))
+        give_user_a_bonus(self.user, BonusType.objects.get(event=BonusType.LOGIN), Decimal(0))
+        self.money_spent.set((Decimal(10)))
+
+        transfer_eligible_bonuses_to_real_money_wallet(self.user)
+
+        self.assertEqual(self.money_spent.total, Decimal(10))
+
+    def test_user_has_one_nonempty_bonus_money_wallet_but_wager_requirement_isnt_met_so_money_spent_doesnt_change(self):
+        give_user_a_bonus(self.user, BonusType.objects.get(event=BonusType.LOGIN), Decimal(10))
+        self.money_spent.set((Decimal(10)))
+
+        transfer_eligible_bonuses_to_real_money_wallet(self.user)
+
+        self.assertEqual(self.money_spent.total, Decimal(10))
+
+    def test_user_has_one_nonempty_bonus_wallet_and_cashin_wager_requirement_is_exactly_the_same_as_money_spent_for_wagering_so_money_spent_goes_down_to_zero(self):
+        give_user_a_bonus(self.user, BonusType.objects.get(event=BonusType.LOGIN), Decimal(10))
+        self.money_spent.set((Decimal(100)))
+
+        transfer_eligible_bonuses_to_real_money_wallet(self.user)
+
+        self.assertEqual(self.money_spent.total, Decimal(0))
+
+    def test_user_with_3_bonus_wallets_2_have_balance_only_one_can_get_wagered(self):
+        give_user_a_bonus(self.user, BonusType.objects.get(event=BonusType.LOGIN), Decimal(0))
+        give_user_a_bonus(self.user, BonusType.objects.get(event=BonusType.LOGIN), Decimal(10))
+        give_user_a_bonus(self.user, BonusType.objects.get(event=BonusType.LOGIN), Decimal(5))
+        self.money_spent.set((Decimal(140)))
+
+        transfer_eligible_bonuses_to_real_money_wallet(self.user)
+
+        self.assertEqual(self.money_spent.total, Decimal(90))
+
+    def test_user_with_3_bonus_wallets_3_have_balance_only_two_can_get_wagered(self):
+        give_user_a_bonus(self.user, BonusType.objects.get(event=BonusType.LOGIN), Decimal(20))
+        give_user_a_bonus(self.user, BonusType.objects.get(event=BonusType.LOGIN), Decimal(10))
+        give_user_a_bonus(self.user, BonusType.objects.get(event=BonusType.LOGIN), Decimal(5))
+        self.money_spent.set((Decimal(160)))
+
+        transfer_eligible_bonuses_to_real_money_wallet(self.user)
+
+        self.assertEqual(self.money_spent.total, Decimal(10))
+
